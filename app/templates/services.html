@@ -13,27 +13,39 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="/">Trisoft</a>
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='images/logo.webp') }}" alt="Logo" class="rounded-circle"
+                    style="height: 80px; width: 80px; object-fit: cover;">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/services">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/services">Servicios</a></li>
                     <li class="nav-item"><a class="nav-link" href="/contact">Contacto</a></li>
                 </ul>
             </div>
         </div>
     </nav>
-
+    <header class="bg-primary text-white text-center d-flex justify-content-center align-items-center"
+        style="height: 70vh; position: relative;">
+        <div class="container" style="z-index: 2;">
+            <h1 class="title">Contactanos</h1>
+            <a href="/contact" class="professional-button">
+                Contacto <span class="arrow">→</span>
+            </a>
+        </div>
+        <img src="{{ url_for('static', filename='images/portada.webp') }}" alt="Portada"
+            class="img-fluid position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover; z-index: 1;">
+    </header>
     <!-- Servicios Section -->
     <section class="py-5">
         <div class="container">
             <h2 class="text-center mb-4">Nuestros Servicios</h2>
-            <p class="text-center mb-5">Ofrecemos soluciones técnicas completas para satisfacer tus necesidades de hardware, software y seguridad.</p>
             <div class="row">
                 <!-- Servicio 1 -->
                 <div class="col-md-4 mb-4">
