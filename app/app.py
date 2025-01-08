@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from functools import wraps
+import os
 
 app = Flask(__name__, static_folder='statics')
 
@@ -7,14 +8,15 @@ app = Flask(__name__, static_folder='statics')
 clients = []
 client_id = 1
 
-# Clave secreta para la sesión
-app.secret_key = 'your_secret_key'
+# Clave secreta para la sesión (usando variable de entorno para mayor seguridad)
+app.secret_key = os.getenv('SECRET_KEY', 'your_default_secret_key')
 
 # Función para proteger rutas privadas
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session:
+        if 'logged_in' not in session or not session['logged_in']:
+            flash("Por favor, inicia sesión para acceder a esta página.")
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -30,12 +32,16 @@ def services():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        # Procesar el formulario de contacto
+        # Validar los datos enviados
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message')
 
-        # Guardar los datos (simulado en la memoria)
+        if not name or not email or not message:
+            flash("Todos los campos son obligatorios.")
+            return redirect(url_for('contact'))
+
+        # Guardar los datos en memoria
         global client_id
         client = {
             'id': client_id,
@@ -46,8 +52,8 @@ def contact():
         clients.append(client)
         client_id += 1
 
-        # Mostrar un mensaje de éxito o permanecer en la misma página
-        return render_template('contact.html', message="Mensaje enviado correctamente")
+        flash("Mensaje enviado correctamente.")
+        return redirect(url_for('contact'))
 
     return render_template('contact.html')
 
@@ -58,19 +64,34 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Verificar si las credenciales son correctas (esto es solo un ejemplo)
-        if username == 'admin' and password == 'admin':
+        # Usar credenciales almacenadas de manera segura (aquí ejemplo fijo)
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
+
+        if username == admin_username and password == admin_password:
             session['logged_in'] = True
+            flash("Inicio de sesión exitoso.")
             return redirect(url_for('clients_page'))
         else:
-            return 'Credenciales incorrectas', 403
+            flash("Credenciales incorrectas.", "error")
+            return redirect(url_for('login'))
 
     return render_template('login.html')
+
+# Ruta para cerrar sesión
+@app.route('/logout')
+@login_required
+def logout():
+    session.clear()
+    flash("Has cerrado sesión correctamente.")
+    return redirect(url_for('login'))
 
 # Ruta para mostrar la lista de clientes (solo accesible por el desarrollador)
 @app.route('/clients')
 @login_required
 def clients_page():
+    if not clients:
+        flash("No hay clientes registrados aún.")
     return render_template('clients.html', clients=clients)
 
 if __name__ == '__main__':
